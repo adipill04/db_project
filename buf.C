@@ -136,10 +136,25 @@ const Status BufMgr::readPage(File* file, const int PageNo, Page*& page)
 const Status BufMgr::unPinPage(File* file, const int PageNo, 
 			       const bool dirty) 
 {
+    //get frame using file, PageNo
+    int frame;
+    hashTable->lookup(file, PageNo, frame);
 
+    //not found
+    if (frame == HASHNOTFOUND){
+        return HASHNOTFOUND;
+    }
+    
+    //unpin if needed
+    if (bufTable[frame].pinCnt > 0){
+       bufTable[frame].pinCnt--;
+       if (dirty){bufTable[frame].dirty=dirty;} 
+    }
+    else{
+        return PAGENOTPINNED;
+    }
 
-
-
+    return OK;
 
 }
 
