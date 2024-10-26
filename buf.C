@@ -65,22 +65,71 @@ BufMgr::~BufMgr() {
 
 const Status BufMgr::allocBuf(int & frame) 
 {
-
-
-
-
-
-
+    for (int i = 0; i < numBufs*2;i++){
+        advanceClock();
+        if (bufTable[clockHand].valid == false){
+            // bufTable[clockHand].Set();
+            bufTable[clockHand].Clear();
+            frame = clockHand;
+            bufStats.accesses++;
+            return OK;
+        } else {
+            if (bufTable[clockHand].refbit == true){
+                bufTable[clockHand].refbit = false;
+                continue;
+            }
+            if (bufTable[clockHand].pinCnt > 0){
+                continue;
+            }
+            if (bufTable[clockHand].dirty == true){
+                if (bufTable[clockHand].file->writePage(bufTable[clockHand].pageNo, bufPool+clockHand) != OK){
+                    bufStats.diskwrites++;
+                    return UNIXERR;
+                }
+            }
+            // bufTable[clockHand].Set();
+            if (hashTable->remove(bufTable[clockHand].file, bufTable[clockHand].pageNo) == HASHTBLERROR){
+                return HASHTBLERROR;
+            }
+            bufTable[clockHand].Clear();
+            frame = clockHand;
+            bufStats.accesses++;
+            return OK;
+        }
+    }
+    return BUFFEREXCEEDED;
 }
 
 	
 const Status BufMgr::readPage(File* file, const int PageNo, Page*& page)
 {
+    
+    int frame_num = 0;
+    hashTable->lookup(file, PageNo, frame_num);
 
-
-
-
-
+    if (frame_num == HASHNOTFOUND){
+        Status alloc_message = allocBuf(frame_num);
+        if (alloc_message == UNIXERR){
+            return UNIXERR;
+        } 
+        if (alloc_message == BUFFEREXCEEDED){
+            return BUFFEREXCEEDED;
+        }
+        if (file->readPage(PageNo, bufPool + frame_num) != OK){
+            return UNIXERR;
+        }
+        bufStats.diskreads++;
+        if (hashTable->insert(file, PageNo, frame_num) == HASHTBLERROR){
+            return HASHTBLERROR;
+        }
+        bufTable[frame_num].Set(file, PageNo);
+        page = bufPool + frame_num;
+    } else {
+        bufTable[frame_num].refbit = true;
+        bufTable[frame_num].pinCnt++;
+        page = bufPool + frame_num;
+    }
+    return OK;
 }
 
 
@@ -96,12 +145,21 @@ const Status BufMgr::unPinPage(File* file, const int PageNo,
 
 const Status BufMgr::allocPage(File* file, int& pageNo, Page*& page) 
 {
-
-
-
-
-
-
+    if (file->allocatePage(pageNo) == UNIXERR){
+        return UNIXERR;
+    }
+    bufStats.diskreads++;
+    int frame = 0;
+    Status allocBuf_stat = allocBuf(frame);
+    if (allocBuf_stat != OK){
+        return allocBuf_stat;
+    }
+    if (hashTable->insert(file, pageNo, frame) == HASHTBLERROR){
+        return HASHTBLERROR;
+    }
+    bufTable[frame].Set(file, pageNo);
+    page = bufPool + frame;
+    return OK;
 
 }
 
