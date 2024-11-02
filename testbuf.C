@@ -148,7 +148,7 @@ int main()
 
 #ifdef DEBUGBUF
     bufMgr->printSelf();
-#endif DEBUGBUF
+#endif //DEBUGBUF - changed
 
     cout << "\nReading \"test.1\"...\n";
     cout << "Expected Result: ";
@@ -223,7 +223,7 @@ int main()
 
 #ifdef DEBUGBUF
     bufMgr->printSelf();
-#endif DEBUGBUF
+#endif //DEBUGBUF
 
     for (i = 0; i < num; i++)
       CALL(bufMgr->unPinPage(file4, i+2, true));

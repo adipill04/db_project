@@ -24,7 +24,10 @@ BufMgr::BufMgr(const int bufs)
     numBufs = bufs;
 
     bufTable = new BufDesc[bufs];
-    memset(bufTable, 0, bufs * sizeof(BufDesc));
+    //memset(bufTable, 0, bufs * sizeof(BufDesc));
+    for (int i = 0; i < bufs; i++) {
+    bufTable[i] = BufDesc(); 
+    }
     for (int i = 0; i < bufs; i++) 
     {
         bufTable[i].frameNo = i;
@@ -81,13 +84,12 @@ const Status BufMgr::allocBuf(int & frame)
             if (bufTable[clockHand].pinCnt > 0){
                 continue;
             }
-            if (bufTable[clockHand].dirty == true){
+            if (bufTable[clockHand].dirty == true){ 
                 if (bufTable[clockHand].file->writePage(bufTable[clockHand].pageNo, bufPool+clockHand) != OK){
                     bufStats.diskwrites++;
                     return UNIXERR;
                 }
             }
-            // bufTable[clockHand].Set();
             if (hashTable->remove(bufTable[clockHand].file, bufTable[clockHand].pageNo) == HASHTBLERROR){
                 return HASHTBLERROR;
             }
@@ -105,9 +107,9 @@ const Status BufMgr::readPage(File* file, const int PageNo, Page*& page)
 {
     
     int frame_num = 0;
-    hashTable->lookup(file, PageNo, frame_num);
+    Status stat = hashTable->lookup(file, PageNo, frame_num);
 
-    if (frame_num == HASHNOTFOUND){
+    if (stat == HASHNOTFOUND){
         Status alloc_message = allocBuf(frame_num);
         if (alloc_message == UNIXERR){
             return UNIXERR;
@@ -148,7 +150,7 @@ const Status BufMgr::unPinPage(File* file, const int PageNo,
     //unpin if needed
     if (bufTable[frame].pinCnt > 0){
        bufTable[frame].pinCnt--;
-       if (dirty){bufTable[frame].dirty=dirty;} 
+       if (dirty) bufTable[frame].dirty=dirty;
     }
     else{
         return PAGENOTPINNED;
