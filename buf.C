@@ -1,3 +1,9 @@
+// Names + IDs:
+// Jeffrey Wang, jjwang8@wisc.edu, 9084378281
+// 
+// Purpose:
+// This file contains the main implementation of the Buf Manager class.
+
 #include <memory.h>
 #include <unistd.h>
 #include <errno.h>
