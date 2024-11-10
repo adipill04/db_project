@@ -1,8 +1,12 @@
 // Names + IDs:
 // Jeffrey Wang, jjwang8@wisc.edu, 9084378281
-// 
+// Aarya Deshpande, avdeshpande4@wisc.edu, 9083817461
+//
 // Purpose:
-// This file contains the main implementation of the Buf Manager class.
+// This file contains the main implementation of the Buf Manager class. It is a
+// buffer manager that manages the buffer pool. It is responsible for
+// reading and writing pages to and from the buffer pool and disk.
+// 
 
 #include <memory.h>
 #include <unistd.h>
