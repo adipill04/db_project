@@ -1,10 +1,10 @@
 Aarya Deshpande, avdeshpande4@wisc.edu
-Aditya Pillai, adi4pillai@wisc.edu
+Aditya Pillai, appillai@wisc.edu
 Jeffrey Wang, jjwang8@wisc.edu
 
 Group Contributions:
 Aarya: helped debug readPage and added the documentation comments;
-Aditya: wrote unPinPage, helped debug methods;
+Aditya: wrote unPinPage, debugged readPage;
 Jeffrey: wrote the initial allocBuf, readPage, allocPage methods;
 
 We held frequent meetings to work on the project. We all contributed equally.
